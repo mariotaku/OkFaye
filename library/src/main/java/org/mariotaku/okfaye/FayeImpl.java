@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Created by mariotaku on 16/3/27.
  */
-public class FayeImpl extends Faye {
+public final class FayeImpl extends Faye {
     final WebSocketCall call;
     final long pingInterval;
 
@@ -45,7 +45,7 @@ public class FayeImpl extends Faye {
     }
 
     @Override
-    public void handshake(final Callback<HandshakeResponse> callback) {
+    protected void handshake(final Callback<HandshakeResponse> callback) {
         if (advice != null && Advice.NONE.equals(advice.reconnect)) return;
         if (state != UNCONNECTED) return;
         state = CONNECTING;
@@ -66,7 +66,7 @@ public class FayeImpl extends Faye {
     }
 
     @Override
-    public void connect(final Callback<ConnectionResponse> callback) {
+    protected void connect(final Callback<ConnectionResponse> callback) {
         if (advice != null && Advice.NONE.equals(advice.reconnect)) return;
         if (state == DISCONNECTED) return;
 
@@ -353,6 +353,7 @@ public class FayeImpl extends Faye {
             }
 
             void call(String json) {
+                if (callback == null) return;
                 try {
                     for (T item : LoganSquare.parseList(json, cls)) {
                         if (id != null && !id.equals(item.getId())) continue;

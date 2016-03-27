@@ -17,11 +17,8 @@ public abstract class Faye {
     public static final int CONNECTED = 3;
     public static final int DISCONNECTED = 4;
 
-    public abstract void handshake(Callback<HandshakeResponse> callback);
-
-    public abstract void connect(Callback<ConnectionResponse> callback);
-
-    public abstract void disconnect();
+    Faye() {
+    }
 
     public abstract void subscribe(String subscription, Callback<String> callback);
 
@@ -29,9 +26,15 @@ public abstract class Faye {
 
     public abstract void publish(String channel, String data, Callback<Response> callback);
 
+    public abstract void disconnect();
+
     public abstract void setExtension(Extension extension);
 
     public abstract int getState();
+
+    protected abstract void handshake(Callback<HandshakeResponse> callback);
+
+    protected abstract void connect(Callback<ConnectionResponse> callback);
 
     @Override
     protected void finalize() throws Throwable {
@@ -49,15 +52,7 @@ public abstract class Faye {
     /**
      * Created by mariotaku on 16/3/27.
      */
-    @JsonObject
-    public abstract static class Extension {
-
-    }
-
-    /**
-     * Created by mariotaku on 16/3/27.
-     */
-    public static class Defaults {
+    public final static class Defaults {
 
         public static final long CONNECTION_TIMEOUT_MILLIS = 60 * 1000;
         public static final int RETRY_INTERVAL = 0;
@@ -68,7 +63,7 @@ public abstract class Faye {
     /**
      * Created by mariotaku on 16/3/27.
      */
-    public static class Channel {
+    public final static class Channel {
         public static final String HANDSHAKE = "/meta/handshake";
         public static final String CONNECT = "/meta/connect";
         public static final String SUBSCRIBE = "/meta/subscribe";
@@ -87,7 +82,7 @@ public abstract class Faye {
      * Created by mariotaku on 16/3/27.
      */
     @JsonObject
-    public static class Advice {
+    public final static class Advice {
         public static final String HANDSHAKE = "handshake";
         public static final String RETRY = "retry";
         public static final String NONE = "none";
@@ -124,7 +119,7 @@ public abstract class Faye {
     /**
      * Created by mariotaku on 16/3/27.
      */
-    public static class ConnectionResponse extends Response {
+    public final static class ConnectionResponse extends Response {
         @Override
         public String toString() {
             return "ConnectionResponse{} " + super.toString();
@@ -135,7 +130,7 @@ public abstract class Faye {
      * Created by mariotaku on 16/3/27.
      */
     @JsonObject
-    public static class HandshakeResponse extends Response {
+    public final static class HandshakeResponse extends Response {
 
         @JsonField(name = "clientId")
         String clientId;
@@ -164,7 +159,7 @@ public abstract class Faye {
      * Created by mariotaku on 16/3/27.
      */
     @JsonObject
-    public static class SubscriptionResponse extends Response {
+    public final static class SubscriptionResponse extends Response {
         @Override
         public String toString() {
             return "SubscriptionResponse{} " + super.toString();

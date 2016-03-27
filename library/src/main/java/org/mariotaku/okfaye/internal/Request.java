@@ -7,7 +7,7 @@ import com.bluelinelabs.logansquare.annotation.JsonObject;
 import com.bluelinelabs.logansquare.typeconverters.TypeConverter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import org.mariotaku.okfaye.Faye;
+import org.mariotaku.okfaye.Extension;
 
 import java.io.IOException;
 
@@ -21,13 +21,13 @@ public abstract class Request {
     @JsonField(name = "id")
     String id;
     @JsonField(name = "ext", typeConverter = ExtensionSerializer.class)
-    Faye.Extension extension;
+    Extension extension;
 
     public void setChannel(String channel) {
         this.channel = channel;
     }
 
-    public void setExtension(Faye.Extension extension) {
+    public void setExtension(Extension extension) {
         this.extension = extension;
     }
 
@@ -48,23 +48,23 @@ public abstract class Request {
                 '}';
     }
 
-    static class ExtensionSerializer implements TypeConverter<Faye.Extension> {
+    static class ExtensionSerializer implements TypeConverter<Extension> {
         @Override
-        public Faye.Extension parse(JsonParser jsonParser) throws IOException {
+        public Extension parse(JsonParser jsonParser) throws IOException {
             // We don't support parse
             return null;
         }
 
         @Override
-        public void serialize(Faye.Extension object, String fieldName, boolean writeFieldNameForObject,
+        public void serialize(Extension object, String fieldName, boolean writeFieldNameForObject,
                               JsonGenerator jsonGenerator) throws IOException {
             if (object == null) return;
             if (writeFieldNameForObject) {
                 jsonGenerator.writeFieldName(fieldName);
             }
-            final JsonMapper<? extends Faye.Extension> mapper = LoganSquare.mapperFor(object.getClass());
+            final JsonMapper<? extends Extension> mapper = LoganSquare.mapperFor(object.getClass());
             //noinspection unchecked
-            ((JsonMapper<Faye.Extension>) mapper).serialize(object, jsonGenerator, true);
+            ((JsonMapper<Extension>) mapper).serialize(object, jsonGenerator, true);
         }
     }
 }
