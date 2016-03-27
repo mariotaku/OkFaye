@@ -9,9 +9,10 @@ import org.mariotaku.okfaye.Faye;
 @JsonObject
 public class DisconnectRequest extends IdentifiedRequest {
 
-    public static DisconnectRequest create() {
+    public static DisconnectRequest create(String clientId) {
         final DisconnectRequest request = new DisconnectRequest();
         request.setChannel(Faye.Channel.DISCONNECT);
+        request.setClientId(clientId);
         return request;
     }
 

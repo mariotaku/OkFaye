@@ -113,7 +113,7 @@ public final class FayeImpl extends Faye {
         if (state != CONNECTED) return;
         state = DISCONNECTED;
 
-        DisconnectRequest message = DisconnectRequest.create();
+        DisconnectRequest message = DisconnectRequest.create(clientId);
         sendMessage(message, Response.class, new Callback<Response>() {
             @Override
             public void callback(Response response) {
