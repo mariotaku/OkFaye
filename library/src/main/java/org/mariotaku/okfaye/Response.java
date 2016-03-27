@@ -16,6 +16,8 @@ public class Response {
     String id;
     @JsonField(name = "advice")
     Faye.Advice advice;
+    @JsonField(name = "error")
+    String error;
 
     public String getChannel() {
         return channel;
@@ -33,13 +35,18 @@ public class Response {
         return advice;
     }
 
+    public String getError() {
+        return error;
+    }
+
     @Override
     public String toString() {
-        return "BaseResponse{" +
+        return "Response{" +
                 "channel='" + channel + '\'' +
                 ", successful=" + successful +
                 ", id='" + id + '\'' +
                 ", advice=" + advice +
+                ", error='" + error + '\'' +
                 '}';
     }
 }
