@@ -1,14 +1,13 @@
-package org.mariotaku.okfaye.response;
+package org.mariotaku.okfaye;
 
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
-import org.mariotaku.okfaye.Advice;
 
 /**
  * Created by mariotaku on 16/3/27.
  */
 @JsonObject
-public class BaseResponse {
+public class Response {
     @JsonField(name = "channel")
     String channel;
     @JsonField(name = "successful")
@@ -16,7 +15,7 @@ public class BaseResponse {
     @JsonField(name = "id")
     String id;
     @JsonField(name = "advice")
-    Advice advice;
+    Faye.Advice advice;
 
     public String getChannel() {
         return channel;
@@ -30,7 +29,7 @@ public class BaseResponse {
         return id;
     }
 
-    public Advice getAdvice() {
+    public Faye.Advice getAdvice() {
         return advice;
     }
 

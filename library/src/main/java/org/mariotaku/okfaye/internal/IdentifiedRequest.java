@@ -1,4 +1,4 @@
-package org.mariotaku.okfaye.request;
+package org.mariotaku.okfaye.internal;
 
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
@@ -7,7 +7,7 @@ import com.bluelinelabs.logansquare.annotation.JsonObject;
  * Created by mariotaku on 16/3/27.
  */
 @JsonObject
-public abstract class IdentifiedRequest extends BaseRequest {
+public abstract class IdentifiedRequest extends Request {
     @JsonField(name = "clientId")
     String clientId;
 

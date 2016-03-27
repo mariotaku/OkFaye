@@ -1,9 +1,8 @@
-package org.mariotaku.okfaye.request;
+package org.mariotaku.okfaye.internal;
 
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
-import org.mariotaku.okfaye.Channel;
-import org.mariotaku.okfaye.Defaults;
+import org.mariotaku.okfaye.Faye;
 
 import java.util.Arrays;
 
@@ -11,7 +10,7 @@ import java.util.Arrays;
  * Created by mariotaku on 16/3/27.
  */
 @JsonObject
-public class HandshakeRequest extends BaseRequest {
+public class HandshakeRequest extends Request {
     @JsonField(name = "version")
     String version;
     @JsonField(name = "supportedConnectionTypes")
@@ -38,8 +37,8 @@ public class HandshakeRequest extends BaseRequest {
 
     public static HandshakeRequest create() {
         HandshakeRequest request = new HandshakeRequest();
-        request.setChannel(Channel.HANDSHAKE);
-        request.setVersion(Defaults.BAYEUX_VERSION);
+        request.setChannel(Faye.Channel.HANDSHAKE);
+        request.setVersion(Faye.Defaults.BAYEUX_VERSION);
         final String[] supportedConnectionTypes = {"websocket", "eventsource", "long-polling",
                 "cross-origin-long-polling", "callback-polling"};
         request.setSupportedConnectionTypes(supportedConnectionTypes);

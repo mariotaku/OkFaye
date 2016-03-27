@@ -1,7 +1,7 @@
-package org.mariotaku.okfaye.request;
+package org.mariotaku.okfaye.internal;
 
 import com.bluelinelabs.logansquare.annotation.JsonObject;
-import org.mariotaku.okfaye.Channel;
+import org.mariotaku.okfaye.Faye;
 
 /**
  * Created by mariotaku on 16/3/27.
@@ -11,7 +11,7 @@ public class DisconnectRequest extends IdentifiedRequest {
 
     public static DisconnectRequest create() {
         final DisconnectRequest request = new DisconnectRequest();
-        request.setChannel(Channel.DISCONNECT);
+        request.setChannel(Faye.Channel.DISCONNECT);
         return request;
     }
 

@@ -1,4 +1,4 @@
-package org.mariotaku.okfaye.request;
+package org.mariotaku.okfaye.internal;
 
 import com.bluelinelabs.logansquare.JsonMapper;
 import com.bluelinelabs.logansquare.LoganSquare;
@@ -7,7 +7,7 @@ import com.bluelinelabs.logansquare.annotation.JsonObject;
 import com.bluelinelabs.logansquare.typeconverters.TypeConverter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import org.mariotaku.okfaye.Extension;
+import org.mariotaku.okfaye.Faye;
 
 import java.io.IOException;
 
@@ -15,19 +15,19 @@ import java.io.IOException;
  * Created by mariotaku on 16/3/27.
  */
 @JsonObject
-public abstract class BaseRequest {
+public abstract class Request {
     @JsonField(name = "channel")
     String channel;
     @JsonField(name = "id")
     String id;
     @JsonField(name = "ext", typeConverter = ExtensionSerializer.class)
-    Extension extension;
+    Faye.Extension extension;
 
     public void setChannel(String channel) {
         this.channel = channel;
     }
 
-    public void setExtension(Extension extension) {
+    public void setExtension(Faye.Extension extension) {
         this.extension = extension;
     }
 
@@ -48,23 +48,23 @@ public abstract class BaseRequest {
                 '}';
     }
 
-    static class ExtensionSerializer implements TypeConverter<Extension> {
+    static class ExtensionSerializer implements TypeConverter<Faye.Extension> {
         @Override
-        public Extension parse(JsonParser jsonParser) throws IOException {
+        public Faye.Extension parse(JsonParser jsonParser) throws IOException {
             // We don't support parse
             return null;
         }
 
         @Override
-        public void serialize(Extension object, String fieldName, boolean writeFieldNameForObject,
+        public void serialize(Faye.Extension object, String fieldName, boolean writeFieldNameForObject,
                               JsonGenerator jsonGenerator) throws IOException {
             if (object == null) return;
             if (writeFieldNameForObject) {
                 jsonGenerator.writeFieldName(fieldName);
             }
-            final JsonMapper<? extends Extension> mapper = LoganSquare.mapperFor(object.getClass());
+            final JsonMapper<? extends Faye.Extension> mapper = LoganSquare.mapperFor(object.getClass());
             //noinspection unchecked
-            ((JsonMapper<Extension>) mapper).serialize(object, jsonGenerator, true);
+            ((JsonMapper<Faye.Extension>) mapper).serialize(object, jsonGenerator, true);
         }
     }
 }

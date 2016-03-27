@@ -2,17 +2,12 @@ package org.mariotaku.okfaye;
 
 import com.bluelinelabs.logansquare.LoganSquare;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.ws.WebSocket;
 import okhttp3.ws.WebSocketCall;
 import okhttp3.ws.WebSocketListener;
 import okio.Buffer;
-import org.mariotaku.okfaye.request.*;
-import org.mariotaku.okfaye.response.BaseResponse;
-import org.mariotaku.okfaye.response.ConnectionResponse;
-import org.mariotaku.okfaye.response.HandshakeResponse;
-import org.mariotaku.okfaye.response.SubscriptionResponse;
+import org.mariotaku.okfaye.internal.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -78,7 +73,7 @@ public class FayeImpl extends Faye {
         if (socketListener == null) {
             socketListener = new InternalWebSocketListener(this) {
                 @Override
-                public void onOpen(WebSocket webSocket, Response response) {
+                public void onOpen(WebSocket webSocket, okhttp3.Response response) {
                     super.onOpen(webSocket, response);
                     connect(callback);
                 }
@@ -105,9 +100,9 @@ public class FayeImpl extends Faye {
         connectRequest = true;
 
         ConnectionRequest message = ConnectionRequest.create(clientId);
-        sendMessage(message, BaseResponse.class, new Callback<BaseResponse>() {
+        sendMessage(message, Response.class, new Callback<Response>() {
             @Override
-            public void callback(BaseResponse response) {
+            public void callback(Response response) {
                 cycleConnection();
             }
         });
@@ -119,9 +114,9 @@ public class FayeImpl extends Faye {
         state = DISCONNECTED;
 
         DisconnectRequest message = DisconnectRequest.create();
-        sendMessage(message, BaseResponse.class, new Callback<BaseResponse>() {
+        sendMessage(message, Response.class, new Callback<Response>() {
             @Override
-            public void callback(BaseResponse response) {
+            public void callback(Response response) {
                 // TODO do something for errors
                 socketListener.disconnect();
             }
@@ -130,7 +125,7 @@ public class FayeImpl extends Faye {
     }
 
     @Override
-    public void subscribe(final String subscription, final MessageCallback callback) {
+    public void subscribe(final String subscription, final Callback<String> callback) {
         connect(new Callback<ConnectionResponse>() {
             @Override
             public void callback(ConnectionResponse response) {
@@ -171,12 +166,12 @@ public class FayeImpl extends Faye {
     }
 
     @Override
-    public void publish(final String channel, final String data, final Callback<BaseResponse> callback) {
+    public void publish(final String channel, final String data, final Callback<Response> callback) {
         connect(new Callback<ConnectionResponse>() {
             @Override
             public void callback(ConnectionResponse response) {
                 PublishRequest message = PublishRequest.create(channel, data);
-                sendMessage(message, BaseResponse.class, callback);
+                sendMessage(message, Response.class, callback);
             }
         });
     }
@@ -199,8 +194,8 @@ public class FayeImpl extends Faye {
         connect(null);
     }
 
-    <Req extends BaseRequest, Resp extends BaseResponse> boolean sendMessage(Req message, Class<Resp> respCls,
-                                                                             Callback<Resp> callback) {
+    <Req extends Request, Resp extends Response> boolean sendMessage(Req message, Class<Resp> respCls,
+                                                                     Callback<Resp> callback) {
         message.setExtension(extension);
         message.setId(nextId());
         return socketListener.sendMessage(message, respCls, callback);
@@ -225,7 +220,7 @@ public class FayeImpl extends Faye {
     static class InternalWebSocketListener implements WebSocketListener {
         final FayeImpl faye;
         final Map<String, SendResultHandler<?>> resultHandlers = new HashMap<>();
-        final Map<String, MessageCallback> messageCallbacks = new HashMap<>();
+        final Map<String, Callback<String>> messageCallbacks = new HashMap<>();
         final Timer timer = new Timer(true);
 
         WebSocket webSocket;
@@ -236,13 +231,13 @@ public class FayeImpl extends Faye {
         }
 
         @Override
-        public void onOpen(WebSocket webSocket, Response response) {
+        public void onOpen(WebSocket webSocket, okhttp3.Response response) {
             this.webSocket = webSocket;
             reschedulePing();
         }
 
-        <Req extends BaseRequest, Resp extends BaseResponse> boolean sendMessage(Req message, Class<Resp> respCls,
-                                                                                 Callback<Resp> callback) {
+        <Req extends Request, Resp extends Response> boolean sendMessage(Req message, Class<Resp> respCls,
+                                                                         Callback<Resp> callback) {
             try {
                 String messageJson = LoganSquare.serialize(message);
                 final String id = message.getId();
@@ -257,23 +252,23 @@ public class FayeImpl extends Faye {
 
 
         @Override
-        public void onFailure(IOException e, Response response) {
+        public void onFailure(IOException e, okhttp3.Response response) {
         }
 
         @Override
         public void onMessage(ResponseBody message) throws IOException {
             final String json = message.string();
-            List<BaseResponse> responseList = LoganSquare.parseList(json, BaseResponse.class);
+            List<Response> responseList = LoganSquare.parseList(json, Response.class);
             if (responseList != null) {
-                for (BaseResponse response : responseList) {
+                for (Response response : responseList) {
                     Advice advice = response.getAdvice();
                     if (advice != null) {
                         faye.handleAdvice(advice);
                     }
                     final String channel = response.getChannel(), id = response.getId();
-                    MessageCallback callback = messageCallbacks.get(channel);
+                    Callback<String> callback = messageCallbacks.get(channel);
                     if (callback != null) {
-                        callback.message(json);
+                        callback.callback(json);
                     }
                     SendResultHandler<?> handler = resultHandlers.remove(id);
                     if (handler != null) {
@@ -299,11 +294,11 @@ public class FayeImpl extends Faye {
             return webSocket == null;
         }
 
-        public void addSubscription(String subscription, MessageCallback callback) {
+        public void addSubscription(String subscription, Callback<String> callback) {
             messageCallbacks.put(subscription, callback);
         }
 
-        public MessageCallback removeSubscription(String subscription) {
+        public Callback<String> removeSubscription(String subscription) {
             return messageCallbacks.remove(subscription);
         }
 
@@ -346,7 +341,7 @@ public class FayeImpl extends Faye {
             }
         }
 
-        static class SendResultHandler<T extends BaseResponse> {
+        static class SendResultHandler<T extends Response> {
             private final String id;
             private final Class<T> cls;
             private final Callback<T> callback;

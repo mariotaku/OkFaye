@@ -1,8 +1,8 @@
-package org.mariotaku.okfaye.request;
+package org.mariotaku.okfaye.internal;
 
 import com.bluelinelabs.logansquare.annotation.JsonField;
 import com.bluelinelabs.logansquare.annotation.JsonObject;
-import org.mariotaku.okfaye.Channel;
+import org.mariotaku.okfaye.Faye;
 
 /**
  * Created by mariotaku on 16/3/27.
@@ -29,7 +29,7 @@ public class ConnectionRequest extends IdentifiedRequest {
 
     public static ConnectionRequest create(String clientId) {
         ConnectionRequest request = new ConnectionRequest();
-        request.setChannel(Channel.CONNECT);
+        request.setChannel(Faye.Channel.CONNECT);
         request.setClientId(clientId);
         request.setConnectionType("websocket");
         return request;
