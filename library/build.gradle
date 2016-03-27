@@ -1,9 +1,12 @@
 group 'com.github.mariotaku'
-version '0.9'
+version '0.9.1'
 
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: "net.ltgt.apt"
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
 
 buildscript {
     repositories {
