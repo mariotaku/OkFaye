@@ -18,6 +18,8 @@ public class Response {
     Faye.Advice advice;
     @JsonField(name = "error")
     String error;
+    @JsonField(name = "data", typeConverter = JsonStringConverter.class)
+    String data;
 
     public String getChannel() {
         return channel;
@@ -37,6 +39,10 @@ public class Response {
 
     public String getError() {
         return error;
+    }
+
+    public String getData() {
+        return data;
     }
 
     @Override

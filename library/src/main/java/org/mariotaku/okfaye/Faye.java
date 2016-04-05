@@ -5,6 +5,7 @@ import com.bluelinelabs.logansquare.annotation.JsonObject;
 import okhttp3.OkHttpClient;
 import okhttp3.ws.WebSocketCall;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -29,6 +30,8 @@ public abstract class Faye {
     public abstract void disconnect();
 
     public abstract void setExtension(Extension extension);
+
+    public abstract void setErrorListener(ErrorListener errorListener);
 
     public abstract int getState();
 
@@ -76,6 +79,10 @@ public abstract class Faye {
      */
     public interface Callback<T> {
         void callback(T response);
+    }
+
+    public interface ErrorListener {
+        void error(IOException e, int code, String reason);
     }
 
     /**

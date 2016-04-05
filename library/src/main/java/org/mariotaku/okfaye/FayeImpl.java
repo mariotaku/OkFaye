@@ -26,6 +26,7 @@ public final class FayeImpl extends Faye {
     Extension extension;
     boolean connectRequest;
     long messageId;
+    ErrorListener errorListener;
 
     FayeImpl(WebSocketCall call, long pingInterval) {
         this.call = call;
@@ -37,6 +38,11 @@ public final class FayeImpl extends Faye {
     @Override
     public void setExtension(Extension extension) {
         this.extension = extension;
+    }
+
+    @Override
+    public void setErrorListener(ErrorListener errorListener) {
+        this.errorListener = errorListener;
     }
 
     @Override
@@ -214,6 +220,15 @@ public final class FayeImpl extends Faye {
         return Long.toString(++messageId, 36);
     }
 
+    void unconnected(IOException e, int code, String reason) {
+        if (state == DISCONNECTED) return;
+        state = UNCONNECTED;
+        if (errorListener != null) {
+            errorListener.error(e, code, reason);
+        }
+    }
+
+
     /**
      * Created by mariotaku on 16/3/27.
      */
@@ -221,9 +236,10 @@ public final class FayeImpl extends Faye {
         final FayeImpl faye;
         final Map<String, SendResultHandler<?>> resultHandlers = new HashMap<>();
         final Map<String, Callback<String>> messageCallbacks = new HashMap<>();
-        final Timer timer = new Timer(true);
 
+        final Timer timer = new Timer(true);
         WebSocket webSocket;
+
         TimerTask pingTask;
 
         public InternalWebSocketListener(FayeImpl faye) {
@@ -236,23 +252,30 @@ public final class FayeImpl extends Faye {
             reschedulePing();
         }
 
+
         <Req extends Request, Resp extends Response> boolean sendMessage(Req message, Class<Resp> respCls,
                                                                          Callback<Resp> callback) {
+            if (webSocket == null) return false;
             try {
                 String messageJson = LoganSquare.serialize(message);
                 final String id = message.getId();
                 resultHandlers.put(id, new SendResultHandler<>(id, respCls, callback));
                 webSocket.sendMessage(RequestBody.create(WebSocket.TEXT, messageJson));
             } catch (IOException e) {
+                faye.unconnected(e, -1, null);
                 disconnect();
                 return false;
             }
             return true;
         }
 
-
         @Override
         public void onFailure(IOException e, okhttp3.Response response) {
+            if (response != null) {
+                faye.unconnected(e, response.code(), response.message());
+            } else {
+                faye.unconnected(e, -1, null);
+            }
         }
 
         @Override
@@ -268,7 +291,7 @@ public final class FayeImpl extends Faye {
                     final String channel = response.getChannel(), id = response.getId();
                     Callback<String> callback = messageCallbacks.get(channel);
                     if (callback != null) {
-                        callback.callback(json);
+                        callback.callback(response.getData());
                     }
                     SendResultHandler<?> handler = resultHandlers.remove(id);
                     if (handler != null) {
@@ -287,6 +310,7 @@ public final class FayeImpl extends Faye {
         @Override
         public void onClose(int code, String reason) {
             webSocket = null;
+            faye.unconnected(null, code, reason);
             cancelPing();
         }
 
@@ -315,6 +339,7 @@ public final class FayeImpl extends Faye {
                         webSocket.sendPing(buffer);
                     } catch (IOException e) {
                         // Ignore
+                        faye.unconnected(e, -1, null);
                         disconnect();
                     }
                 }
@@ -322,12 +347,12 @@ public final class FayeImpl extends Faye {
             timer.schedule(pingTask, faye.pingInterval);
         }
 
+
         private void cancelPing() {
             if (pingTask == null) return;
             pingTask.cancel();
             pingTask = null;
         }
-
 
         void clearSubscription() {
             messageCallbacks.clear();
@@ -344,6 +369,7 @@ public final class FayeImpl extends Faye {
         static class SendResultHandler<T extends Response> {
             private final String id;
             private final Class<T> cls;
+
             private final Callback<T> callback;
 
             SendResultHandler(String id, Class<T> cls, Callback<T> callback) {
@@ -353,7 +379,7 @@ public final class FayeImpl extends Faye {
             }
 
             void call(String json) {
-                if (callback == null) return;
+                if (callback == null || json == null) return;
                 try {
                     for (T item : LoganSquare.parseList(json, cls)) {
                         if (id != null && !id.equals(item.getId())) continue;
@@ -364,5 +390,6 @@ public final class FayeImpl extends Faye {
                 }
             }
         }
+
     }
 }

@@ -4,6 +4,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ws.WebSocketCall;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -15,6 +16,16 @@ public class Sample {
         Request request = new Request.Builder().url("http://localhost:18080").build();
         WebSocketCall call = WebSocketCall.create(client, request);
         Faye faye = Faye.create(client, call);
+        faye.setErrorListener(new Faye.ErrorListener() {
+            @Override
+            public void error(IOException e, int code, String reason) {
+                if (e != null) {
+                    e.printStackTrace();
+                } else {
+                    System.err.printf("%d: %s\n", code, reason);
+                }
+            }
+        });
 
         Scanner scanner = new Scanner(System.in);
         while (faye.getState() != Faye.DISCONNECTED && scanner.hasNext()) {
