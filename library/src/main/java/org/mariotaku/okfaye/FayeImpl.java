@@ -1,5 +1,6 @@
 package org.mariotaku.okfaye;
 
+import com.bluelinelabs.logansquare.JsonMapper;
 import com.bluelinelabs.logansquare.LoganSquare;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -172,7 +173,7 @@ public final class FayeImpl extends Faye {
     }
 
     @Override
-    public void publish(final String channel, final String data, final Callback<Response> callback) {
+    public void publish(final String channel, final Object data, final Callback<Response> callback) {
         connect(new Callback<ConnectionResponse>() {
             @Override
             public void callback(ConnectionResponse response) {
@@ -257,7 +258,10 @@ public final class FayeImpl extends Faye {
                                                                          Callback<Resp> callback) {
             if (webSocket == null) return false;
             try {
-                String messageJson = LoganSquare.serialize(message);
+                final List<Req> messageList = Collections.singletonList(message);
+                //noinspection unchecked
+                final JsonMapper<Req> mapper = (JsonMapper<Req>) LoganSquare.mapperFor(message.getClass());
+                final String messageJson = mapper.serialize(messageList);
                 final String id = message.getId();
                 resultHandlers.put(id, new SendResultHandler<>(id, respCls, callback));
                 webSocket.sendMessage(RequestBody.create(WebSocket.TEXT, messageJson));

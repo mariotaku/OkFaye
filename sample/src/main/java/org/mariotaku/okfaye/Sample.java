@@ -10,7 +10,7 @@ import java.util.Scanner;
  * Created by mariotaku on 16/3/27.
  */
 public class Sample {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url("http://localhost:18080").build();
         WebSocketCall call = WebSocketCall.create(client, request);
@@ -22,7 +22,6 @@ public class Sample {
                 System.err.printf("%d: %s\n", code, reason);
             }
         });
-
         Scanner scanner = new Scanner(System.in);
         while (faye.getState() != Faye.DISCONNECTED && scanner.hasNext()) {
             final String line = scanner.nextLine();

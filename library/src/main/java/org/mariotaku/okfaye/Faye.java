@@ -25,7 +25,7 @@ public abstract class Faye {
 
     public abstract void unsubscribe(String subscription);
 
-    public abstract void publish(String channel, String data, Callback<Response> callback);
+    public abstract void publish(String channel, Object data, Callback<Response> callback);
 
     public abstract void disconnect();
 
