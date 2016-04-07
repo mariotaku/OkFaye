@@ -34,7 +34,7 @@ WebSocketCall call = WebSocketCall.create(client, request);
 Faye faye = Faye.create(client, call);
 faye.subscribe("/your/channel", message -> {...});
 Object sendMessage = (...); // String or model annotated by @JsonObject
-faye.publish("target/channel", sendMessage, response -> {...});
+faye.publish("/target/channel", sendMessage, response -> {...});
 ````
 
 ### Additional features ###
