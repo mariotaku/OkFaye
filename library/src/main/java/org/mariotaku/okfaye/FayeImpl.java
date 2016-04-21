@@ -256,7 +256,7 @@ public final class FayeImpl extends Faye {
 
         <Req extends Request, Resp extends Response> boolean sendMessage(Req message, Class<Resp> respCls,
                                                                          Callback<Resp> callback) {
-            if (webSocket == null) return false;
+            if (isClosed()) return false;
             try {
                 final List<Req> messageList = Collections.singletonList(message);
                 //noinspection unchecked
@@ -363,11 +363,13 @@ public final class FayeImpl extends Faye {
         }
 
         void disconnect() {
+            if (isClosed()) return;
             try {
                 webSocket.close(1000, "Closed");
             } catch (IOException e) {
                 // Ignore
             }
+            webSocket = null;
         }
 
         static class SendResultHandler<T extends Response> {
